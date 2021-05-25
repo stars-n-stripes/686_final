@@ -9,6 +9,8 @@ numpy = "*"
 networkx = "*"
 matplotlib = "*"
 pandas = "*"
+cython = "*"
+jupyter = "*"
 
 [dev-packages]
 
