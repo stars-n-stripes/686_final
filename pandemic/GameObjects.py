@@ -53,7 +53,7 @@ class EffectCard(Card):
 
 
 class BoardSpace:
-    def __init__(self, name, color, players=None, connections=None, **kwargs):
+    def __init__(self, name, color, players=None, connections=None,research_staiton=False, **kwargs):
 
         if connections:
             self.connections = connections
@@ -78,7 +78,7 @@ class BoardSpace:
         # Remember if a player is there.
         self.color = color
         # Boolean for research station
-        self._research_station = False
+        self._research_station = research_staiton
 
     def get_connections_as_strings(self):
         return self.connections
@@ -174,6 +174,9 @@ class PandemicBoard:
                 # Find and log connections
                 connections = row["connections"].split(";")
 
+                # Detect if there's a research station there
+                research_station = bool(int(row["research_station"]))  # e.g., Casts a "0" stirng to an int, then False
+
                 # make the space
                 #                 print("New BoardSpace with name {}, {} players, and disease concentrations Red: {}, Blue: {}, Yellow: {}, Black: {}"
                 #                       .format(name, len(players) if isinstance(players, list) else 0, diseases["red"], diseases["blue"], diseases["black"], diseases["yellow"])) # debug
@@ -181,7 +184,7 @@ class PandemicBoard:
                 #                 for x in connections:
                 #                     print("\t", x)
 
-                b = BoardSpace(name, color, players, connections, **diseases)
+                b = BoardSpace(name, color, players, connections,research_station, **diseases)
                 self._spaces.append(b)
         # Finally, generate a graph representation for viz and running the GA
         self._nx, self.shortest_path_lengths, self.shortest_paths = self.gen_networkx()
