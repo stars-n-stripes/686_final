@@ -77,9 +77,20 @@ class BoardSpace:
                 self.diseases[ln] = 0
         # Remember if a player is there.
         self.color = color
+        # Boolean for research station
+        self._research_station = False
 
     def get_connections_as_strings(self):
         return self.connections
+
+    def add_station(self):
+        self._research_station = True
+
+    def has_station(self):
+        return self._research_station
+
+    def remove_station(self):
+        self._research_station = False
 
     def _connstr(self):
         cstr = ""
@@ -170,7 +181,7 @@ class PandemicBoard:
                 #                 for x in connections:
                 #                     print("\t", x)
 
-                b = BoardSpace(name, players, color, connections, **diseases)
+                b = BoardSpace(name, color, players, connections, **diseases)
                 self._spaces.append(b)
         # Finally, generate a graph representation for viz and running the GA
         self._nx, self.shortest_path_lengths, self.shortest_paths = self.gen_networkx()

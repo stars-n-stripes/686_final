@@ -444,7 +444,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Create board and run
-    board = PandemicBoard("pandemic_board.csv")
+    board = PandemicBoard("./data/pandemic_board.csv")
     #     best_path, progress = main(board, 150, 0.25, 0.01, 1000)
     results, progress = main(board, args.popsize, args.elitepct, args.mrate, args.ngens)
 
