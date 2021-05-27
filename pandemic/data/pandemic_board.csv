@@ -1,0 +1,49 @@
+city_name,color,players,red,blue,yellow,black,connections,research_station
+Algiers,yellow,0,0,0,0,0,cairo;istanbul;paris;madrid,0
+Atlanta,blue,1234,0,0,0,0,washington;miami;chicago,1
+Baghdad,black,0,0,0,0,0,tehran;istanbul;karachi;riyadh;cairo,0
+Bangkok,red,0,0,0,0,0,chennai;kolkata;hong kong;ho chi minh city;jakarta,0
+Beijing,red,0,0,0,0,0,seoul;shanghai,0
+Bogota,yellow,0,0,0,0,0,miami;mexico city;lima;sao paulo,0
+Buenos Aires,yellow,0,0,0,0,0,sao paulo;bogota,0
+Cairo,black,0,0,0,0,0,khartoum;algiers;riyadh;istanbul;baghdad,0
+Chennai,black,0,0,0,0,0,mumbai;bangkok;kolkata;delhi,0
+Chicago,blue,0,0,0,0,0,atlanta;san francisco;los angeles;mexico city,0
+Delhi,black,0,0,0,0,0,kolkata;chennai;mumbai;karachi;tehran,0
+Essen,blue,0,0,0,0,0,st. petersburg;milan;paris;london,0
+Ho Chi Minh City,red,0,0,0,0,0,jakarta;manila;bangkok;hong kong,0
+Hong Kong,red,0,0,0,0,0,ho chi minh city;manila;bangkok;shanghai;taipei,0
+Istanbul,black,0,0,0,0,0,algiers;milan;cairo;baghdad;moscow,0
+Jakarta,red,0,0,0,0,0,ho chi minh city;chennai;bangkok;sydney,0
+Johannesburg,yellow,0,0,0,0,0,kinshasa;khartoum,0
+Karachi,black,0,0,0,0,0,mumbai;delhi;tehran;baghdad;riyadh,0
+Khartoum,yellow,0,0,0,0,0,kinshasa;lagos,0
+Kinshasa,yellow,0,0,0,0,0,johannesburg;lagos;khartoum,0
+Kolkata,yellow,0,0,0,0,0,bangkok;hong kong;delhi;chennai,0
+Lagos,yellow,0,0,0,0,0,sao paulo;kinshasa;khartoum,0
+Lima,yellow,0,0,0,0,0,santiago;bogota;mexico city,0
+London,blue,0,0,0,0,0,madrid;new york;essen;paris,0
+Los Angeles,yellow,0,0,0,0,0,san francisco;sydney,0
+Madrid,blue,0,0,0,0,0,sao paulo;new york;algiers;paris,0
+Manila,red,0,0,0,0,0,hong kong;taipei;sydney;ho chi minh city;san francisco,0
+Mexico City,yellow,0,0,0,0,0,los angeles;bogota;lima;chicago;miami,0
+Miami,yellow,0,0,0,0,0,mexico city;bogota;washington;atlanta,0
+Milan,blue,0,0,0,0,0,paris;essen;istanbul,0
+Montreal,blue,0,0,0,0,0,chicago;new york;washington,0
+Moscow,black,0,0,0,0,0,st. petersburg;istanbul;tehran,0
+Mumbai,black,0,0,0,0,0,chennai;karachi;delhi,0
+New York,blue,0,0,0,0,0,washington;montreal;madrid;london,0
+Osaka,red,0,0,0,0,0,tokyo;taipei,0
+Paris,blue,0,0,0,0,0,essen;milan;algiers;madrid;london,0
+Riyadh,black,0,0,0,0,0,cairo;baghdad;karachi,0
+San Francisco,blue,0,0,0,0,0,tokyo;milan;chicago;los angeles,0
+Santiago,yellow,0,0,0,0,0,lima,0
+Sao Paulo,yellow,0,0,0,0,0,buenos aires;madrid;lagos;bogota,0
+Seoul,red,0,0,0,0,0,tokyo;shanghai;beijing,0
+Shanghai,red,0,0,0,0,0,beijing;seoul;tokyo;hong kong,0
+St. Petersburg,blue,0,0,0,0,0,essen;moscow;istanbul,0
+Sydney,red,0,0,0,0,0,manila;jakarta;los angeles,0
+Taipei,red,0,0,0,0,0,osaka;manila;hong kong;shanghai,0
+Tehran,black,0,0,0,0,0,moscow;delhi;baghdad;karachi,0
+Tokyo,red,0,0,0,0,0,seoul;shanghai;osaka;san francisco,0
+Washington,blue,0,0,0,0,0,new york;montreal;atlanta;miami,0

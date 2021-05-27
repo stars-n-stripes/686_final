@@ -92,6 +92,8 @@ class BoardSpace:
     def remove_station(self):
         self._research_station = False
 
+
+
     def _connstr(self):
         cstr = ""
         for c in self.connections:
@@ -209,6 +211,10 @@ class PandemicBoard:
         for p in self.players:
             if p.pid == pid:
                 return p
+
+    def spaces(self):
+        for s in self._spaces:
+            yield s
 
     def get_connections_as_BoardSpaces(self, target_name):
         c = self[target_name].get_connections_as_strings()
