@@ -1,0 +1,6 @@
+London,blue,0,0,0,0,0,madrid;new york;essen;paris
+Madrid,blue,0,0,0,0,0,sao paulo;new york;algiers;paris
+Paris,blue,0,0,0,0,0,essen;milan;algiers;madrid;london
+Milan,blue,0,0,0,0,0,paris;essen;istanbul
+Essen,blue,0,0,0,0,0,st. petersburg;milan;paris;london
+St. Petersburg,blue,0,0,0,0,0,essen;moscow;istanbul

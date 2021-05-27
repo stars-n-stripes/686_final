@@ -1,5 +1,6 @@
 from GameObjects import *
 
+
 def create_route(game_board):
     """
     Creates a valid route that encompasses all of the nodes.
@@ -27,8 +28,8 @@ def create_route(game_board):
             cities.remove(current_city)
 
     # Generate a random, VALID maximal independent set
-    mis = nx.maximal_independent_set(game_board.get_graph())
-    return path, mis
+    miset = nx.maximal_independent_set(game_board.get_graph())
+    return path, miset
 
 
 def create_initial_population(game_board, pop_size):
@@ -55,7 +56,6 @@ class GenomeEvaluator:
         self.fitness = 0.0
         self.mis_penalty = 100
 
-
     def mis_cost(self):
         """
         All MISs created at the start of the run are valid.
@@ -68,20 +68,15 @@ class GenomeEvaluator:
         temp_set = []
         for city in self.mis:
             if self.board.is_mis_safe(city, set(temp_set)):
-                temp_set.append(city) # Adds the BSpace obj, not a string
+                temp_set.append(city)  # Adds the BSpace obj, not a string
             else:
                 is_valid = False
                 return self.mis_penalty
-        else: # complete the loop without breaking
+        else:  # complete the loop without breaking
             # Check the size and return a normalized score
             # MIS can't be greater than numcities/2
-            valid_score = len(self.board.get_graph().nodes) / (2*(1+len(self.mis)))
+            valid_score = len(self.board.get_graph().nodes) / (2 * (1 + len(self.mis)))
             return valid_score
-
-
-
-
-
 
     def route_distance(self):
 
@@ -131,7 +126,6 @@ class GenomeEvaluator:
             # Save the distance
             self.distance = pathDistance
         return self.distance
-
 
     def fitness_function(self):
         if self.fitness == 0:
@@ -226,7 +220,6 @@ def breed(x, y):
     return c
 
 
-
 # Multisequence helper function for ID'ing common sequences between two lists
 # Pulled from here: https://stackoverflow.com/questions/32318113/find-all-common-sequences-of-two-list-in-python
 def matches(list1, list2):
@@ -245,7 +238,7 @@ def breed_variable_length(x, y, board: PandemicBoard):
     b = y[0].copy()
     c = []
 
-    #PATH CROSSOVER
+    # PATH CROSSOVER
     # Attempt single-point crossover
     smaller_len = min(len(a), len(b))
     cross_pt = random.randint(0, smaller_len)
@@ -291,7 +284,6 @@ def breed_variable_length(x, y, board: PandemicBoard):
     return d, larger_mis
 
 
-
 def breed_population(matingpool, elite_ratio, board):
     children = []
     elites = floor(elite_ratio * len(matingpool))
@@ -328,17 +320,15 @@ def mutate_individual(individual: tuple[list, set], mutation_rate, board: Pandem
             path[i] = b
             path[swapee] = a
 
-
     for i, chromosome in enumerate(mis):
         mutation_chance = random.random()
         if mutation_chance < mutation_rate:
             swap_out = random.choice(mis)
             # Quick disjoint one-liner from here:
             # https://stackoverflow.com/questions/13672543/removing-the-common-elements-between-two-lists
-            swap_in = random.choice(list(set(board.get_city_names())^set(mis)))
+            swap_in = random.choice(list(set(board.get_city_names()) ^ set(mis)))
             mis.remove(swap_out)
             mis.append(swap_in)
-
 
     return path, mis
 
@@ -374,15 +364,17 @@ def main(board, initial_pop_size, elite_ratio, mutation_rate, num_generations):
     progress = []
     population = create_initial_population(board, initial_pop_size)
     #     print(population)
-    print("Initial distance: ", str(1 / evaluate_population(population, board)[0][1]))
+    print("Initial distance: ", str(evaluate_population(population, board)[0][1]))
     # Steps
     sleep(.2)
     queue = tqdm(range(num_generations), desc="Progress: ")
     for step in queue:
         population = build_next_generation(population, elite_ratio, mutation_rate, board)
+        best_score = evaluate_population(population, board)[0][1]
+        print(best_score)
         queue.desc = "Progress (Best score: {:.2f},  popsize: {}): ".format(
-            1 / evaluate_population(population, board)[0][1], len(population))
-        best_score = 1 / evaluate_population(population, board)[0][1]
+            best_score, len(population))
+
         progress.append(best_score)
         # Check if we can break
     #         if 50 < best_score < 60:
@@ -468,6 +460,7 @@ if __name__ == "__main__":
     print("Length of Best Path: ", len(best_path))
     print()
 
+
     # diff = list(set(board.city_names) - set(best_path)) + list(set(board.city_names) - set(best_path))
 
     def Diff(li1, li2):
@@ -476,7 +469,6 @@ if __name__ == "__main__":
 
     print("Missed Cities: \n", Diff(board.city_names, best_path))
     print()
-
 
     print("=== MIS ===")
     print("MIS Length: ", len(mis))
@@ -502,8 +494,6 @@ if __name__ == "__main__":
         print("False ({} connects with {})".format(oof_city, oofs))
     else:
         print("True")
-
-
 
     # Prompt for the go-ahead for a pop-up
     input("Press ENTER to see a visualization of the algorithm's training progress.\n"
