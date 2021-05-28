@@ -371,7 +371,7 @@ def main(board, initial_pop_size, elite_ratio, mutation_rate, num_generations):
     for step in queue:
         population = build_next_generation(population, elite_ratio, mutation_rate, board)
         best_score = evaluate_population(population, board)[0][1]
-        print(best_score)
+        # print(best_score)
         queue.desc = "Progress (Best score: {:.2f},  popsize: {}): ".format(
             best_score, len(population))
 
@@ -383,7 +383,7 @@ def main(board, initial_pop_size, elite_ratio, mutation_rate, num_generations):
     #         print(population[0])
     #         input()
     # report final distance
-    print("Final distance: ", str(1 / evaluate_population(population, board)[0][1]))
+    print("Final distance: ", str(evaluate_population(population, board)[0][1]))
 
     best_route_index = evaluate_population(population, board)[0][0]
 

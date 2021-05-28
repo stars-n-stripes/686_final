@@ -79,7 +79,7 @@ class GameGUI:
         return self._coords[city_name]
 
     def draw_board(self):
-        print(self._coords)
+        # print(self._coords) # debug
         if self.tiles:
             for t in self.tiles:
                 t.pack_forget()
