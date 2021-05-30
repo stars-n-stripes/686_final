@@ -1,7 +1,10 @@
+import os
+
+import pandemic
 from GameObjects import *
 
 
-def create_route(game_board):
+def create_route(game_board: PandemicBoard):
     """
     Creates a valid route that encompasses all of the nodes.
     this is equivalent to randomly scrambling the board's _spaces list
@@ -9,17 +12,14 @@ def create_route(game_board):
     This is an implementation of the Nearest-Neighbor approach for TSP initial guess generation from p102 of Talbi
 
     """
-    #     rest = game_board.city_names.copy()
-    #     rest.remove("atlanta")
 
-    #     print(["atlanta"] + random.sample(rest, game_board.num_cities - 1))
-    #     return ["atlanta"] + random.sample(rest, game_board.num_cities - 1)
+    start_city = game_board.home_city_str
 
-    path = ["atlanta"]
+    path = [start_city]
     cities = game_board.city_names.copy()  # The cities we need to visit
     #     print(cities)
-    current_city = "atlanta"  # Every game starts with their players on Atlanta
-    cities.remove("atlanta")
+    current_city = start_city  # Every game starts with their players on Atlanta
+    cities.remove(start_city)
     while cities:
         neighbors = game_board.get_connections_as_BoardSpaces(current_city)
         current_city = random.choice(neighbors).name.lower()
@@ -54,7 +54,9 @@ class GenomeEvaluator:
         self.mis = mis
         self.distance = 0
         self.fitness = 0.0
-        self.mis_penalty = 100
+        self.mis_valid = True
+
+        self.start = board.home_city_str
 
     def mis_cost(self):
         """
@@ -70,8 +72,8 @@ class GenomeEvaluator:
             if self.board.is_mis_safe(city, set(temp_set)):
                 temp_set.append(city)  # Adds the BSpace obj, not a string
             else:
-                is_valid = False
-                return self.mis_penalty
+                self.mis_valid = False
+                return 0
         else:  # complete the loop without breaking
             # Check the size and return a normalized score
             # MIS can't be greater than numcities/2
@@ -104,7 +106,7 @@ class GenomeEvaluator:
                 # Find the destination from this link in the chain
                 if i >= len(route) - 1:
                     # This is the last one; connect it to the origin (atlanta)
-                    dest = "atlanta"
+                    dest = self.start
                 else:
                     dest = route[i + 1]
 
@@ -121,6 +123,7 @@ class GenomeEvaluator:
                     pathDistance += shortest_path
 
             # Assess a penalty for each city that's not in there
+            # print("Missed {} cities".format(len(missed_cities)))
             pathDistance += 25 * len(missed_cities)
 
             # Save the distance
@@ -130,17 +133,30 @@ class GenomeEvaluator:
     def fitness_function(self):
         if self.fitness == 0:
             # We wish to minimize the distance, so return the inverse of the distance
-            self.fitness = 1 / float(self.route_distance())
-        total_score = self.fitness + self.mis_cost()
-        return total_score
+            self.fitness = 1 / (float(self.route_distance()) + self.mis_cost())
+        total_score = self.fitness
+        return total_score, self.mis_valid # Report if the mis is invalid so we can nuke it
 
 
 def evaluate_population(population, board):
     # Helper function that will sort a population in-place based on the fitness evaluator defined above
     results = {}
+    fail_count = 0
     for i, (path, mis) in enumerate(population):
-        results[i] = GenomeEvaluator(path, mis, board).fitness_function()
+        result, is_valid = GenomeEvaluator(path, mis, board).fitness_function()
+        if is_valid: # This item only makes it into the population if its mis is valid
+            results[i] = result
+        else:
+            # Replace this MIS with a new random one
+            # Preserve the path (which we have no reason to nuke)
+            fail_count += 1
+            replacement = (path, create_route(board)[1])
+
+            replacement_result, is_valid = GenomeEvaluator(*replacement, board).fitness_function()
+            # The generator will never return an invalid mis
+            results[i] = replacement_result
     #     print("Evaluated pop: ", sorted(results.items(), key = operator.itemgetter(1), reverse = True))
+    logging.info("Generation failed {} out of {}".format(fail_count, len(population)))
     return sorted(results.items(), key=operator.itemgetter(1), reverse=True)
 
 
@@ -273,15 +289,47 @@ def breed_variable_length(x, y, board: PandemicBoard):
     # thus, we'll merge the two - i.e., we'll iterate through the smaller and add it to the larger if it doesn't invalidate the set
     smaller_mis = min(x[1], y[1], key=lambda x: len(x))
     larger_mis = max(x[1], y[1], key=lambda x: len(x))
-    # print(larger_mis)
-    for city_name in smaller_mis:
-        if city_name in larger_mis:
-            continue
-        else:
-            if board.is_mis_safe(city_name, set(larger_mis)):
-                larger_mis.append(city_name)
+    # Utilizing the HIX heuristic from https://www.scitepress.org/papers/2009/22534/22534.pdf
+    # Reference text:
+    """
+    At first phase, we group up all vertices in either P1 or P2 into a temporary set, say M, and sort 
+    them in increasing order  by  their  degrees  in  underlying  graph.  At  second phase, we generate our 
+    offspring by a simple greedy approach as follows: successively selecting lowest degree vertices first from
+    M and setting corresponding position to 1 in offspring until the selected vertex can not add to 
+    the child solution. In fact, selecting lower degree vertices first gives more chance to other vertices to 
+    be included into the solution, so improving the offspring reproductivity in future generations. As 
+    we will see, this simple greedy algorithm speeds up the convergence rate of solutions to optimum 
+    solution. Figure 2 outlines the Algorithm HIX
+    """
 
-    return d, larger_mis
+    # Initialization
+    child_mis = []
+
+    # First Phase
+    sort_function = lambda city_name: board.get_degree_of(city_name)
+    # the list(set(x + y )) call combines and de-duplicates the parent mis sets
+    p12_combined_sorted = list(set(x[1] + y[1])) # Sort ascending (low degree to high)
+    p12_combined_sorted.sort(key=sort_function)
+    # Second Phase
+    for vertex in p12_combined_sorted:
+        if board.is_mis_safe(vertex, set(child_mis)):
+            child_mis.append(vertex)
+        else:
+            break
+
+
+
+
+
+    # print(larger_mis)
+    # for city_name in smaller_mis:
+    #     if city_name in larger_mis:
+    #         continue
+    #     else:
+    #         if board.is_mis_safe(city_name, set(larger_mis)):
+    #             larger_mis.append(city_name)
+
+    return d, child_mis
 
 
 def breed_population(matingpool, elite_ratio, board):
@@ -364,13 +412,13 @@ def main(board, initial_pop_size, elite_ratio, mutation_rate, num_generations):
     progress = []
     population = create_initial_population(board, initial_pop_size)
     #     print(population)
-    print("Initial distance: ", str(evaluate_population(population, board)[0][1]))
+    print("Initial distance: ", str(1/evaluate_population(population, board)[0][1]))
     # Steps
     sleep(.2)
     queue = tqdm(range(num_generations), desc="Progress: ")
     for step in queue:
         population = build_next_generation(population, elite_ratio, mutation_rate, board)
-        best_score = evaluate_population(population, board)[0][1]
+        best_score = 1/evaluate_population(population, board)[0][1]
         # print(best_score)
         queue.desc = "Progress (Best score: {:.2f},  popsize: {}): ".format(
             best_score, len(population))
@@ -383,7 +431,7 @@ def main(board, initial_pop_size, elite_ratio, mutation_rate, num_generations):
     #         print(population[0])
     #         input()
     # report final distance
-    print("Final distance: ", str(evaluate_population(population, board)[0][1]))
+    print("Final distance: ", str(1/evaluate_population(population, board)[0][1]))
 
     best_route_index = evaluate_population(population, board)[0][0]
 
@@ -407,7 +455,7 @@ def stitch(board, route):
         # Find the destination from this link in the chain
         if i >= len(route) - 1:
             # This is the last one; connect it to the origin (atlanta)
-            dest = "atlanta"
+            dest = board.home_city_str
         else:
             dest = route[i + 1]
 
@@ -415,6 +463,8 @@ def stitch(board, route):
 
         if graph.has_edge(city, dest) or graph.has_edge(dest,
                                                         city):  # FIXME: About 95% positive has_edge is agnostic to order for an UDir graph
+            out += [route[i]]
+            a = i
             continue
         else:
             intermediaries = board.shortest_paths[city][dest]
@@ -427,10 +477,18 @@ def stitch(board, route):
 
 
 if __name__ == "__main__":
+
+    # collect the available board options:
+    datadir = os.listdir(pandemic.DATA_DIR)
+
+    datafiles = list(filter(lambda x: "board" in x and ".csv" in x, datadir))
+
+
+
     # CLI interface
     parser = argparse.ArgumentParser()
     parser.add_argument("-e", "--elitepct", type=float,
-                        help="The % of each generation that should carry over from the most fit of the gen, as a decimal (default 0.3)",
+                        help="The percentage of each generation that should carry over from the most fit of the gen, as a decimal (default 0.3)",
                         default=0.3)
     parser.add_argument("-m", "--mrate", type=float, help="The mutation rate, as a decimal value (default 0.002)",
                         default=0.002)
@@ -440,17 +498,20 @@ if __name__ == "__main__":
                         default=500)
     parser.add_argument("-s", "--save", type=str, help="Whether or not to save the results to a file",
                         default="ga_output.json")
+    parser.add_argument("-b", "--board", type=str, help="Which board to choose.", choices=datafiles,
+                        default="pandemic_board.csv")
 
     args = parser.parse_args()
 
     # Create board and run
-    board = PandemicBoard("./data/pandemic_board.csv")
+    # board = PandemicBoard("./data/pandemic_board.csv")
+    board = PandemicBoard("./data/{}".format(args.board))
     #     best_path, progress = main(board, 150, 0.25, 0.01, 1000)
     results, progress = main(board, args.popsize, args.elitepct, args.mrate, args.ngens)
 
     best_path, mis = results
 
-    print("Original Best Path: \n\n", best_path)
+    # print("Original Best Path: \n\n", best_path)
 
     # Stitch the best path together
     best_path = stitch(board, best_path)
@@ -467,7 +528,7 @@ if __name__ == "__main__":
         return list(set(li1) - set(li2)) + list(set(li2) - set(li1))
 
 
-    print("Missed Cities: \n", Diff(board.city_names, best_path))
+    # print("Missed Cities: \n", Diff(board.city_names, best_path))
     print()
 
     print("=== MIS ===")

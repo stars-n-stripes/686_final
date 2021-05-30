@@ -12,7 +12,9 @@ import difflib
 from sys import argv
 from copy import deepcopy
 import argparse
+import logging
 
+# logging.
 
 class Disease(Enum):
     RED = 0
@@ -145,13 +147,21 @@ class PandemicBoard:
         self.discard = []
         self.infection_deck = []
         self.discard = []
+        self.home_city_str = "atlanta" # default
 
         # Open the board and read it
         with open(boardFile, "r", encoding="UTF-8") as pbfile:
             pbReader = DictReader(pbfile)
+
             for row in pbReader:
                 #                 print(row)
                 name = row["city_name"].lower()
+                # Detect Home city
+                if name[-1] == "*":
+
+                    name = name.strip("*")
+                    logging.info("Non-standard home city selected: " + name)
+                    self.home_city_str = name
                 color = row["color"].lower()
                 if not row["players"] or row["players"] == "0":
                     players = None
@@ -222,6 +232,21 @@ class PandemicBoard:
         for conn in c:
             out.append(self[conn])
         return out
+
+    def get_degree_of(self, city):
+        """
+        Returns the city's degree using the internal networkx graph
+        :param city:
+        :return:
+        """
+        if isinstance(city, BoardSpace):
+            # Argument is the city bsobject
+            city_str = city.name
+        else:
+            city_str = city
+
+        # Make the degree request
+        return self._nx.degree[city_str]
 
     def gen_networkx(self):
         # To be called at the end of __init__, this function creates a Networkx representation of the board
