@@ -32,7 +32,7 @@ class GameGUI:
         ctrl_height = 2 * height // 5
         self.BoardCanvas = Canvas(self.GUIWindow, width=width, height=img_height, bg="black")
         # self.ControlCanvas = Canvas(self.GUIWindow, width=width, height=ctrl_height, bg="grey")
-        self.BoardCanvas.pack(side=TOP)
+        self.BoardCanvas.grid(column=0, row=0, rowspan=5)
         # self.ControlCanvas.pack(side=BOTTOM)
         self.GUIWindow.title("CSCE 686 Final Project - Lynch")
 
@@ -67,7 +67,7 @@ class GameGUI:
         # Add control buttons
         self.test_button = Button(self.GUIWindow, text="Draw Board", command=self.draw_board, bg="grey",
                                   activebackground="red")
-        self.test_button.pack(side=BOTTOM, expand=True)
+        self.test_button.grid(column=0, row=5)
 
         # Add board options in a manner similar to project_genetic's cli
         datadir = os.listdir(pandemic.DATA_DIR)
@@ -79,25 +79,65 @@ class GameGUI:
         self.board_filepath.set(df_label_names[0])
         self.board_choice_dropdown = OptionMenu(self.GUIWindow, self.board_filepath, df_label_names[0], *df_label_names[1:],
                                                 command=self.filepath_changed)
-        self.board_choice_dropdown.pack(side=BOTTOM)
+        self.board_choice_dropdown.grid(column=0, row=6)
 
         # Add buttons to load a board
         self.load_board_button = Button(self.GUIWindow, text="Load Board from CSV", command=self.load_board_from_csv,
                                         bg="grey", activebackground="red")
-        self.load_board_button.pack(side=BOTTOM)
+        self.load_board_button.grid(column=1, row=6)
 
         #Initialize the private _board_filepath variable
         self._board_filepath = ""
         self.filepath_changed()
 
         # Add Parameter fields for genetic algorithm
-        self.num_generations = IntVar(self.GUIWindow)
-        self.num_iterations = IntVar(self.GUIWindow)
-        self.mutation_rate = DoubleVar(self.GUIWindow)
-        self.elite_ratio = DoubleVar(self.GUIWindow)
+        self._num_pop_str = StringVar(self.GUIWindow)
+        self._num_iterations_str = StringVar(self.GUIWindow)
+        self._mutation_rate_str = StringVar(self.GUIWindow)
+        self._elite_ratio_str = StringVar(self.GUIWindow)
+        self._stochastic_params = {
+            "num_pop": 100,
+            "num_iterations": 500,
+            "mutation_rate": 0.002,
+            "elite_ratio": 0.1
+        }
 
+        self.ng_label = Label(self.GUIWindow, text="Population Size: ", bg="grey")
+        self.ng_label.grid(column=0, row=7)
+        self.num_generations_input = Entry(self.GUIWindow, text="Population Size: ", bg="grey",
+                                           textvariable=self._num_pop_str )
+        self.num_generations_input.grid(column=1, row=7)
+        self.mutation_rate_input = Entry(self.GUIWindow, text="Mutation Rate: ", bg="grey",
+                                           textvariable=self._mutation_rate_str)
+        self.mutation_rate_input.grid(column=1, row=8)
+        self.elite_ratio_input = Entry(self.GUIWindow, text="Elite Ratio: ", bg="grey",
+                                           textvariable=self._elite_ratio_str)
+        self.elite_ratio_input.grid(column=1, row=9)
+        self.num_iterations_input = Entry(self.GUIWindow, text="Number of Generations: ", bg="grey",
+                                           textvariable=self._num_iterations_str)
+        self.num_iterations_input.grid(column=1, row=10)
         # Do an initial draw
         self.draw_board()
+
+    def update_stochastic_vars(self):
+        try:
+            self._stochastic_params["num_pop"] = int(self._num_pop_str.get())
+        except ValueError:
+            pass
+        try:
+            self._stochastic_params["num_iterations"] = int(self._num_iterations_str.get())
+        except ValueError:
+            pass
+        try:
+            self._stochastic_params["mutation_rate"] = int(self._mutation_rate_str.get())
+        except ValueError:
+            pass
+        try:
+            self._stochastic_params["elite_ratio"] = int(self._elite_ratio_str.get())
+        except ValueError:
+            pass
+
+
 
     def filepath_changed(self, *args):
         # Converts the label name we get out of the GUI to the filepath we need to actually use

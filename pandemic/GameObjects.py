@@ -216,7 +216,10 @@ class PandemicBoard:
 
         if isinstance(key, int):
             return self._spaces[key]
-
+        elif isinstance(key, BoardSpace):
+            for element in self.spaces():
+                if element.name == key.name:
+                    return element
         for element in self._spaces:
             if element.name == key:
                 return element
@@ -244,6 +247,9 @@ class PandemicBoard:
     def spaces(self):
         for s in self._spaces:
             yield s
+
+    def __iter__(self):
+        return self._spaces.__iter__()
 
     def get_connections_as_BoardSpaces(self, target_name):
         c = self[target_name].get_connections_as_strings()

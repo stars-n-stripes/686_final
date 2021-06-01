@@ -1,6 +1,6 @@
 city_name,color,players,red,blue,yellow,black,connections,research_station
 Algiers,yellow,0,0,0,0,0,cairo;istanbul;paris;madrid,0
-Atlanta,blue,1234,0,0,0,0,washington;miami;chicago,1
+Atlanta*,blue,1234,0,0,0,0,washington;miami;chicago,1
 Baghdad,black,0,0,0,0,0,tehran;istanbul;karachi;riyadh;cairo,0
 Bangkok,red,0,0,0,0,0,chennai;kolkata;hong kong;ho chi minh city;jakarta,0
 Beijing,red,0,0,0,0,0,seoul;shanghai,0
