@@ -1,0 +1,7 @@
+city_name,color,players,red,blue,yellow,black,connections,research_station
+London,blue,0,0,0,0,0,madrid;essen;paris,1
+Madrid,blue,0,0,0,0,0,paris;london,0
+Paris*,blue,0,0,0,0,0,essen;milan;madrid;london,0
+Milan,blue,0,0,0,0,0,paris;essen;st. petersburg,0
+Essen,blue,0,0,0,0,0,st. petersburg;milan;paris;london,0
+St. Petersburg,blue,0,0,0,0,0,essen;milan,0

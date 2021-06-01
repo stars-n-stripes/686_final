@@ -163,6 +163,7 @@ class PandemicBoard:
                     name = name.strip("*")
                     logging.info("Non-standard home city selected: " + name)
                     self.home_city_str = name
+                    orig_home_index = len(self._spaces)
                 color = row["color"].lower()
                 if not row["players"] or row["players"] == "0":
                     players = None
@@ -207,6 +208,10 @@ class PandemicBoard:
         self.city_names = [city.name for city in self._spaces]
         self.num_cities = len(self.city_names)
 
+        # Set the home space to be index zero
+
+        self._spaces[0], self._spaces[orig_home_index] = self._spaces[orig_home_index], self._spaces[0]
+
     def __getitem__(self, key):
 
         if isinstance(key, int):
@@ -246,6 +251,12 @@ class PandemicBoard:
         for conn in c:
             out.append(self[conn])
         return out
+
+    def get_connections_as_strings(self, city_name):
+        if isinstance(city_name, str):
+            return self[city_name].get_connections_as_strings()
+        elif isinstance(city_name, BoardSpace):
+            return city_name.get_connections_as_strings()
 
     def get_degree_of(self, city):
         """

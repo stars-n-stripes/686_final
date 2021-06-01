@@ -2,6 +2,36 @@ import os
 import pandemic
 from GameObjects import *
 
+def tsp_candidate(board: PandemicBoard, current_vertex: str, current_path: str) -> bool:
+    previous_vertex = current_path[-1]
+
+    # Check if the potential addition to the path is a valid neighbor
+    if current_vertex in board[previous_vertex].get_connections_as_strings():
+        return False
+
+    # Check if the potential addition is already in the path
+    elif current_vertex in path:
+        return False
+    else:
+        return True
+
+def continue_tsp(board: PandemicBoard, path):
+    """
+    Continuation function for if the MIS has completed, but we need to keep on moving on the TSP
+    :param board:
+    :param path:
+    :return:
+    """
+    pass
+
+def continue_mis(board:PandemicBoard, path):
+    """
+    Continuation function for if the TSP has completed, but we need to keep moving on the MIS
+    :param board:
+    :param path:
+    :return:
+    """
+    pass
 
 def mis_with_backtracking(board: PandemicBoard, path) -> (list[str], list[str]):
     """
@@ -68,7 +98,7 @@ def mis_with_backtracking(board: PandemicBoard, path) -> (list[str], list[str]):
     return res2, path
 
 if __name__ == '__main__':
-    board = PandemicBoard("./data/europe_board.csv")
+    board = PandemicBoard("./data/europe_board_cycle.csv")
     maximalIndependentSet, path = mis_with_backtracking(board, list())
 
     # Prints the Result
