@@ -36,6 +36,8 @@ def continue_mis(board:PandemicBoard, path):
 def mis_with_backtracking(board: PandemicBoard, path) -> (list[str], list[str]):
     """
     Deterministically run a DFS for a hamiltonian cycle, tracking the MIS simultaneously with backtracking
+    Adapted from an example on GeeksForGeeks
+    https://www.geeksforgeeks.org/maximal-independent-set-in-an-undirected-graph/
     :param board:
     :param path:
     :return:
