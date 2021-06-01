@@ -18,6 +18,7 @@ if __name__ == '__main__':
     print("Loaded board.")
     print(board["essen"].players)
     gui = GameGUI(board)
+    gui.path = ["st. petersburg", "essen", "london", "madrid", "paris", "milan"]
     run_gui()
     # print("here")
     # board = board

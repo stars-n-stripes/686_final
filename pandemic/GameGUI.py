@@ -3,6 +3,8 @@ from pandemic.GameObjects import *
 from PIL import Image, ImageTk
 from pathlib import Path
 from csv import DictReader
+import pandemic
+import os
 
 JPG_RAW_WIDTH = 1500
 JPG_RAW_HEIGHT = 900
@@ -14,9 +16,17 @@ def run_gui():
 
 class GameGUI:
     CIRCLE_RADIUS = 15
+
     def __init__(self, board: PandemicBoard, width=750, height=750):
+
         self.board = board
         self.GUIWindow = Tk()
+        self.board_filepath = StringVar(self.GUIWindow)
+
+        # Places to store TSP and MIS results, respectively
+        self.path = []
+        self.mis = set()
+
         self.GUIWindow.geometry(str(width) + "x" + str(height))
         img_height = 3 * height // 5
         ctrl_height = 2 * height // 5
@@ -37,7 +47,7 @@ class GameGUI:
         # self.img_label = Label(image=board_img)
         # self.img_label.image = board_img
         # self.img_label.pack(side=TOP)
-        self.BoardCanvas.create_image((0,0), anchor="nw", image=self.tk_image)
+        self.BoardCanvas.create_image((0, 0), anchor="nw", image=self.tk_image)
 
         # To be populated when we call draw_board
         self.tiles = []
@@ -55,9 +65,55 @@ class GameGUI:
                 )
 
         # Add control buttons
-        self.test_button = Button(self.GUIWindow, text="Draw Board", command = self.draw_board, bg="grey", activebackground="red")
+        self.test_button = Button(self.GUIWindow, text="Draw Board", command=self.draw_board, bg="grey",
+                                  activebackground="red")
         self.test_button.pack(side=BOTTOM, expand=True)
 
+        # Add board options in a manner similar to project_genetic's cli
+        datadir = os.listdir(pandemic.DATA_DIR)
+        datafiles = list(filter(lambda x: "board" in x and ".csv" in x, datadir))
+
+        df_label_names = [df.replace("_", " ").replace(".csv", "").capitalize() for df in datafiles]
+        self.label_to_filepath_dict = {label: fp for label, fp in zip(df_label_names, datafiles)}
+        print(df_label_names)
+        self.board_filepath.set(df_label_names[0])
+        self.board_choice_dropdown = OptionMenu(self.GUIWindow, self.board_filepath, df_label_names[0], *df_label_names[1:],
+                                                command=self.filepath_changed)
+        self.board_choice_dropdown.pack(side=BOTTOM)
+
+        # Add buttons to load a board
+        self.load_board_button = Button(self.GUIWindow, text="Load Board from CSV", command=self.load_board_from_csv,
+                                        bg="grey", activebackground="red")
+        self.load_board_button.pack(side=BOTTOM)
+
+        #Initialize the private _board_filepath variable
+        self._board_filepath = ""
+        self.filepath_changed()
+
+        # Add Parameter fields for genetic algorithm
+        self.num_generations = IntVar(self.GUIWindow)
+        self.num_iterations = IntVar(self.GUIWindow)
+        self.mutation_rate = DoubleVar(self.GUIWindow)
+        self.elite_ratio = DoubleVar(self.GUIWindow)
+
+        # Do an initial draw
+        self.draw_board()
+
+    def filepath_changed(self, *args):
+        # Converts the label name we get out of the GUI to the filepath we need to actually use
+        try:
+            self._board_filepath = self.label_to_filepath_dict[self.board_filepath.get()]
+        except KeyError:
+            pass
+
+    def load_board_from_csv(self):
+        try:
+            self.board = PandemicBoard(pandemic.DATA_DIR / self._board_filepath)
+            print("Loaded ", pandemic.DATA_DIR / self._board_filepath)
+            self.draw_board()
+            print("Board drawn on GUI.")
+        except Exception as e:
+            print( e.__str__())
 
     def create_circle_on_board(self, x, y, color, r):  # center coordinates, radius
         x0 = x - r
@@ -65,6 +121,10 @@ class GameGUI:
         x1 = x + r
         y1 = y + r
         return self.BoardCanvas.create_oval(x0, y0, x1, y1, fill=color)
+
+    def create_text_on_board(self, x, y, text, color):  # center coordinates, text
+
+        return self.BoardCanvas.create_text(x, y, text=text, fill=color)
 
     def get_coords(self, city_name):
         """
@@ -82,11 +142,40 @@ class GameGUI:
         # print(self._coords) # debug
         if self.tiles:
             for t in self.tiles:
-                t.pack_forget()
+                self.BoardCanvas.delete(t)
         self.tiles.clear()
         # Create the board
         for space in self.board.spaces():
             x, y = self.get_coords(space.name)
-            circle = self.create_circle_on_board(x, y, space.color, GameGUI.CIRCLE_RADIUS)
+
+            # TODO: Flag whether or not this has a research station
+            # If this is in the MIS, label it green
+            if space.name in self.mis:
+                color = "green"
+            else:
+                color = space.color
+
+            circle = self.create_circle_on_board(x, y, color, GameGUI.CIRCLE_RADIUS)
             self.tiles.append(circle)
+
+        # If we have an active path, draw that  as well
+        if self.path:
+            # To hold each city's eventual text coordinates
+            path_str_dict = dict()
+            for i, city in enumerate(self.path):
+                if i == 0:
+                    text = "0"
+                else:
+                    text = str(i)
+                space = self.board[city]
+                if space.name in path_str_dict.keys():
+                    path_str_dict[space.name] += ",{}".format(text)
+                else:
+                    path_str_dict[space.name] = text
+            # Now, draw the text
+            for city, string in path_str_dict.items():
+                x, y = self.get_coords(city)
+                self.create_text_on_board(x, y, path_str_dict[city], "white")
+
+
 

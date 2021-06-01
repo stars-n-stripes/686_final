@@ -142,6 +142,7 @@ class BoardSpace:
 class PandemicBoard:
     def __init__(self, boardFile):
 
+        self.filepath = boardFile
         self._spaces = []
         self.players = []
         self.discard = []
@@ -221,6 +222,19 @@ class PandemicBoard:
         for p in self.players:
             if p.pid == pid:
                 return p
+
+    def __len__(self):
+
+        return len(self._spaces)
+
+    def __contains__(self, item):
+        if isinstance(item, str):
+            # Checking by name
+            for s in self.spaces():
+                if s.name == item:
+                    return True
+        # Pass by BoardSpace obj
+        return item in self._spaces
 
     def spaces(self):
         for s in self._spaces:
