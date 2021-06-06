@@ -123,7 +123,7 @@ def mis_with_backtracking(board: PandemicBoard, path, original_board: PandemicBo
     # assuming current Vertex
     # not selected
     res1, temp_path = mis_with_backtracking(graph2, path, original_board)
-    if len(temp_path) > path:
+    if len(temp_path) > len(path):
         path = temp_path
     # print(res1)
 
@@ -144,8 +144,9 @@ def mis_with_backtracking(board: PandemicBoard, path, original_board: PandemicBo
     # call assuming neighbors of vFirst
     # are not selected
     # print(mis_with_backtracking(graph2, path)[0])
-    res2, temp_path = [vCurrent] + mis_with_backtracking(graph2, path, original_board)
-    if len(temp_path) > path:
+    g2 = mis_with_backtracking(graph2, path, original_board)
+    res2, temp_path = [vCurrent] + g2[0], g2[1]
+    if len(temp_path) > len(path):
         path = temp_path
 
     # Our final result is the one
