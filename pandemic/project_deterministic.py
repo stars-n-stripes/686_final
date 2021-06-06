@@ -1,8 +1,6 @@
 import os
 import pandemic
 from GameObjects import *
-import tqdm
-
 
 def tsp_candidate(board: PandemicBoard, current_vertex: str, current_path: str) -> bool:
     previous_vertex = current_path[-1]
@@ -124,7 +122,7 @@ def mis_with_backtracking(board: PandemicBoard, path, original_board: PandemicBo
     # Maximal Set,
     # assuming current Vertex
     # not selected
-    res1 = mis_with_backtracking(graph2, path, original_board)[0]
+    res1, path = mis_with_backtracking(graph2, path, original_board)[0]
     # print(res1)
 
     # Case 2 - Proceed considering
