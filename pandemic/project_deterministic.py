@@ -122,7 +122,9 @@ def mis_with_backtracking(board: PandemicBoard, path, original_board: PandemicBo
     # Maximal Set,
     # assuming current Vertex
     # not selected
-    res1, path = mis_with_backtracking(graph2, path, original_board)[0]
+    res1, temp_path = mis_with_backtracking(graph2, path, original_board)
+    if len(temp_path) > path:
+        path = temp_path
     # print(res1)
 
     # Case 2 - Proceed considering
@@ -142,7 +144,9 @@ def mis_with_backtracking(board: PandemicBoard, path, original_board: PandemicBo
     # call assuming neighbors of vFirst
     # are not selected
     # print(mis_with_backtracking(graph2, path)[0])
-    res2 = [vCurrent] + mis_with_backtracking(graph2, path, original_board)[0]
+    res2, temp_path = [vCurrent] + mis_with_backtracking(graph2, path, original_board)
+    if len(temp_path) > path:
+        path = temp_path
 
     # Our final result is the one
     # which is bigger, return it
