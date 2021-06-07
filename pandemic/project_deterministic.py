@@ -72,7 +72,7 @@ def path_has_all_nodes(board, path):
     return True
 
 
-def mis_with_backtracking(board: PandemicBoard, path, original_board: PandemicBoard=None) -> (list[str], list[str]):
+def mis_with_backtracking(board: PandemicBoard, path, original_board: PandemicBoard=None):
     """
     Deterministically run a DFS for a hamiltonian cycle, tracking the MIS simultaneously with backtracking
     Adapted from an example on GeeksForGeeks
