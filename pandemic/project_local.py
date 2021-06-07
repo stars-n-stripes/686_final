@@ -6,11 +6,14 @@ from project_genetic import create_route
 from random import choice, random, randint
 
 # Implementation of a local search for the problem
-def select_neighboring_path(board, path):
+def select_neighboring_path(board, in_path):
+    # TODO: how to we shorten the path?
+    path = in_path.copy()
     swap_start = randint(0, len(path) - 3) # At the worst, we want at least two cities to switch
     swap_end = randint(swap_start + 1, len(path))
     #Reverse the paths with a slice
     path[swap_start:swap_end] = path[swap_start:swap_end:-1]
+    return path
 
 
 def simulated_annealing_path(board: PandemicBoard, cooling_rate, starting_temp, ending_temp):
@@ -24,7 +27,7 @@ def simulated_annealing_path(board: PandemicBoard, cooling_rate, starting_temp, 
         path = create_route(board)[0]
 
         # Score it - lower is better
-        score = missing_ciites_in_path(board, path)
+        score = len(path) * missing_ciites_in_path(board, path) + len(path)
 
         # select a neighboring tour
         """
@@ -35,7 +38,7 @@ def simulated_annealing_path(board: PandemicBoard, cooling_rate, starting_temp, 
          http://www.stat.yale.edu/~pollard/Courses/251.spring2013/Handouts/Chang-MoreMC.pdf
         """
         neighbor = select_neighboring_path(board, path)
-        neighbor_score = missing_ciites_in_path(board, neighbor)
+        neighbor_score = len(neighbor) * missing_ciites_in_path(board, neighbor) + len(neighbor)
 
         # Compare the two and select the better
         if neighbor_score < score:
@@ -56,6 +59,7 @@ def simulated_annealing_path(board: PandemicBoard, cooling_rate, starting_temp, 
 
         # Cool down
         temperature -= cooling_rate
+    return path
 
 
 
@@ -84,3 +88,10 @@ def simulated_annealing_mis(board):
     # Generate a random MIS
     # Create_route is a misnomer, this is being borrowed from the GA code module.
     path = create_route(board)[1]
+
+
+if __name__ == '__main__':
+    board = PandemicBoard("./data/europe_board_cycle.csv")
+    p =simulated_annealing_path(board, starting_temp=0.85, cooling_rate=0.085, ending_temp=0.125)
+    print(p)
+    print(missing_ciites_in_path(board, p))
